@@ -76,6 +76,7 @@ export function MountainProgress() {
             style={[styles.image, imageLayout]}
           />
           <Text
+            testID="mountain-progress-label"
             onLayout={handleLabelLayout}
             style={[
               styles.label,

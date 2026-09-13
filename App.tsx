@@ -28,6 +28,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
+        testID="app-root"
         style={[
           styles.container,
           { flexDirection: isLargeScreen ? "row-reverse" : "column" },
