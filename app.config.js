@@ -24,7 +24,14 @@ module.exports = {
       favicon: "./assets/favicon.png",
     },
     plugins: [
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/splash-icon.png",
+          imageWidth: 200,
+          backgroundColor: "#3f6b4f",
+        },
+      ],
       "expo-asset",
       "expo-font",
       ...(SENTRY_DSN
