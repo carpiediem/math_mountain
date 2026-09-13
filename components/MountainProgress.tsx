@@ -5,7 +5,7 @@ export function MountainProgress() {
     <ImageBackground
       source={require("../assets/images/mountain.jpg")}
       style={styles.container}
-      resizeMode="cover"
+      resizeMode="contain"
     >
       <View style={styles.labelWrap}>
         <Text style={styles.label}>MountainProgress</Text>
