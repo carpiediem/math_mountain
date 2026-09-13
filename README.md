@@ -124,3 +124,8 @@ Building for real devices/stores requires an EAS project (`eas init`) and,
 for crash reporting, a Bugsink project at <https://bugsink.rslc.dev/> —
 neither is provisioned yet for this project. See `AGENTS.md` for what's
 needed once they exist.
+
+## Credits
+
+The favicon (`assets/favicon.png`, from `assets/mountain.png`) is
+<a href="https://www.flaticon.com/free-icons/mountain" title="mountain icons">Mountain icons created by Magnific - Flaticon</a>.
