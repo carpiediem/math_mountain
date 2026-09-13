@@ -83,8 +83,8 @@ AGENTS.md     Conventions and notes for AI coding agents
 ```bash
 npm run lint
 npm run format:check
-npm test
 npx tsc --noEmit
+npm test         # Jest unit tests
 npm run e2e      # Maestro flows, requires a running simulator/emulator + dev build
 ```
 

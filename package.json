@@ -24,10 +24,13 @@
     "build:production": "npx eas-cli build --profile production --platform all"
   },
   "dependencies": {
+    "@expo-google-fonts/uncial-antiqua": "^0.4.1",
     "@sentry/react-native": "^8.25.0",
     "expo": "~57.0.22",
+    "expo-asset": "~57.0.17",
     "expo-constants": "~57.0.18",
     "expo-dev-client": "~57.0.19",
+    "expo-font": "~57.0.4",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

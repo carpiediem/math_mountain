@@ -1,40 +1,79 @@
-import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+
+// The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
+// up front to compute its "contain"-fitted size below, since neither web nor
+// native resizeMode="contain" exposes the scaled image's actual on-screen
+// position, which the label needs to track to stay aligned with the image's
+// top-left corner.
+const IMAGE_WIDTH = 1600;
+const IMAGE_HEIGHT = 1027;
 
 export function MountainProgress() {
+  const [containerSize, setContainerSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  function handleLayout(event: LayoutChangeEvent) {
+    const { width, height } = event.nativeEvent.layout;
+    setContainerSize({ width, height });
+  }
+
+  let imageLayout = null;
+  if (containerSize) {
+    const scale = Math.min(
+      containerSize.width / IMAGE_WIDTH,
+      containerSize.height / IMAGE_HEIGHT,
+    );
+    const width = IMAGE_WIDTH * scale;
+    const height = IMAGE_HEIGHT * scale;
+    imageLayout = {
+      width,
+      height,
+      top: (containerSize.height - height) / 2,
+      left: (containerSize.width - width) / 2,
+    };
+  }
+
   return (
-    <ImageBackground
-      source={require("../assets/images/mountain.jpg")}
+    <View
+      testID="mountain-progress"
       style={styles.container}
-      imageStyle={styles.image}
-      resizeMode="contain"
+      onLayout={handleLayout}
     >
-      <View style={styles.labelWrap}>
-        <Text style={styles.label}>MountainProgress</Text>
-      </View>
-    </ImageBackground>
+      {imageLayout && (
+        <>
+          <Image
+            source={require("../assets/images/mountain.jpg")}
+            style={[styles.image, imageLayout]}
+          />
+          <Text
+            style={[
+              styles.label,
+              { top: imageLayout.top, left: imageLayout.left },
+            ]}
+          >
+            Math Mountain
+          </Text>
+        </>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     overflow: "hidden",
   },
   image: {
-    width: "100%",
-    height: "100%",
-  },
-  labelWrap: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    position: "absolute",
   },
   label: {
-    fontSize: 20,
-    fontWeight: "600",
+    position: "absolute",
+    fontFamily: "UncialAntiqua_400Regular",
+    fontSize: 32,
     color: "#fff",
   },
 });

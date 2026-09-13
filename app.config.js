@@ -25,6 +25,8 @@ module.exports = {
     },
     plugins: [
       "expo-splash-screen",
+      "expo-asset",
+      "expo-font",
       ...(SENTRY_DSN
         ? [
             [
