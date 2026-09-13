@@ -24,7 +24,7 @@
     "build:production": "npx eas-cli build --profile production --platform all"
   },
   "dependencies": {
-    "@expo-google-fonts/uncial-antiqua": "^0.4.1",
+    "@expo-google-fonts/henny-penny": "^0.4.1",
     "@sentry/react-native": "^8.25.0",
     "expo": "~57.0.22",
     "expo-asset": "~57.0.17",

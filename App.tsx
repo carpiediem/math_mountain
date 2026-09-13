@@ -3,8 +3,8 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   useFonts,
-  UncialAntiqua_400Regular,
-} from "@expo-google-fonts/uncial-antiqua";
+  HennyPenny_400Regular,
+} from "@expo-google-fonts/henny-penny";
 
 import { MountainProgress } from "./components/MountainProgress";
 import { QuestionPanel } from "./components/QuestionPanel";
@@ -19,7 +19,7 @@ initSentry();
 export default function App() {
   const { width } = useWindowDimensions();
   const isLargeScreen = width >= LARGE_SCREEN_BREAKPOINT;
-  const [fontsLoaded] = useFonts({ UncialAntiqua_400Regular });
+  const [fontsLoaded] = useFonts({ HennyPenny_400Regular });
 
   if (!fontsLoaded) {
     return null;

@@ -10,7 +10,7 @@ const IMAGE_WIDTH = 1600;
 const IMAGE_HEIGHT = 1027;
 
 // A font-size guess to measure the label's actual rendered width at, since
-// glyph widths (especially for a display face like Uncial Antiqua) aren't
+// glyph widths (especially for a display face like Henny Penny) aren't
 // predictable from fontSize alone - measuring once and then scaling
 // linearly (width scales ~linearly with fontSize for a fixed string) gets
 // the label to roughly TARGET_WIDTH_RATIO of the panel's width without
@@ -24,7 +24,7 @@ const TARGET_WIDTH_RATIO = 0.5;
 // Applied on top of TARGET_WIDTH_RATIO on large screens (see App.tsx's own
 // breakpoint), where MountainProgress sits alongside QuestionPanel rather
 // than stacked below it and has more room to read as a bolder title.
-const LARGE_SCREEN_FONT_SCALE = 1.5;
+const LARGE_SCREEN_FONT_SCALE = 1.1;
 
 type MountainProgressProps = {
   isLargeScreen: boolean;
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   label: {
     position: "absolute",
-    fontFamily: "UncialAntiqua_400Regular",
+    fontFamily: "HennyPenny_400Regular",
     color: "#fff",
   },
 });
