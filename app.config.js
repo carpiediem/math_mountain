@@ -49,7 +49,11 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: process.env.EAS_PROJECT_ID ?? "",
+        // Dynamic app configs can't be auto-written by `eas init`/`eas
+        // update:configure` (see their own warning output) - hardcoded here
+        // instead, same as it would end up in a static app.json.
+        projectId:
+          process.env.EAS_PROJECT_ID ?? "f6079bae-748b-44e4-8642-d2fb82d7396e",
       },
       sentryDsn: SENTRY_DSN,
     },

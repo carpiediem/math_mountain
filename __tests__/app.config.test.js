@@ -21,7 +21,9 @@ describe("app.config.js", () => {
     expect(config.android.package).toBe("us.rslc.mathmountain");
     expect(config.ios.bundleIdentifier).toBe("us.rslc.mathmountain");
     expect(config.extra.sentryDsn).toBe("");
-    expect(config.extra.eas.projectId).toBe("");
+    expect(config.extra.eas.projectId).toBe(
+      "f6079bae-748b-44e4-8642-d2fb82d7396e",
+    );
     expect(
       config.plugins.some(
         (plugin) =>
