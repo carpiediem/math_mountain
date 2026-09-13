@@ -9,6 +9,9 @@ import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 const IMAGE_WIDTH = 1600;
 const IMAGE_HEIGHT = 1027;
 
+const MIN_LABEL_FONT_SIZE = 16;
+const MAX_LABEL_FONT_SIZE = 32;
+
 export function MountainProgress() {
   const [containerSize, setContainerSize] = useState<{
     width: number;
@@ -36,6 +39,17 @@ export function MountainProgress() {
     };
   }
 
+  // Scales with the panel's own width rather than the window's, so the
+  // label stays proportionate whether MountainProgress is a full-width
+  // bottom strip on a small screen or a half-width side panel on a large
+  // one.
+  const labelFontSize = containerSize
+    ? Math.max(
+        MIN_LABEL_FONT_SIZE,
+        Math.min(MAX_LABEL_FONT_SIZE, containerSize.width * 0.08),
+      )
+    : MAX_LABEL_FONT_SIZE;
+
   return (
     <View
       testID="mountain-progress"
@@ -51,7 +65,11 @@ export function MountainProgress() {
           <Text
             style={[
               styles.label,
-              { top: imageLayout.top, left: imageLayout.left },
+              {
+                top: imageLayout.top,
+                left: imageLayout.left,
+                fontSize: labelFontSize,
+              },
             ]}
           >
             Math Mountain
@@ -73,7 +91,6 @@ const styles = StyleSheet.create({
   label: {
     position: "absolute",
     fontFamily: "UncialAntiqua_400Regular",
-    fontSize: 32,
     color: "#fff",
   },
 });
