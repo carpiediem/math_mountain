@@ -127,5 +127,4 @@ needed once they exist.
 
 ## Credits
 
-The favicon (`assets/favicon.png`, from `assets/mountain.png`) is
-<a href="https://www.flaticon.com/free-icons/mountain" title="mountain icons">Mountain icons created by Magnific - Flaticon</a>.
+Icons are from [Mountain icons created by Magnific - Flaticon](https://www.flaticon.com/free-icons/mountain).
