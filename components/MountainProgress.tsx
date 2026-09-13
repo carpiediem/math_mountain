@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Image,
-  LayoutChangeEvent,
-  StyleSheet,
-  Text,
-  TextLayoutEvent,
-  View,
-} from "react-native";
+import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
 // The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
 // up front to compute its "contain"-fitted size below, since neither web nor
@@ -21,14 +14,17 @@ const IMAGE_HEIGHT = 1027;
 // predictable from fontSize alone - measuring once and then scaling
 // linearly (width scales ~linearly with fontSize for a fixed string) gets
 // the label to roughly TARGET_WIDTH_RATIO of the panel's width without
-// needing to re-measure on every resize.
+// needing to re-measure on every resize. Measured via the label's own
+// onLayout, not onTextLayout - react-native-web's Text doesn't implement
+// onTextLayout at all, so it would silently never fire on web and leave the
+// label stuck at this base size regardless of container width.
 const MEASUREMENT_FONT_SIZE = 24;
 const TARGET_WIDTH_RATIO = 0.5;
 
 // Applied on top of TARGET_WIDTH_RATIO on large screens (see App.tsx's own
 // breakpoint), where MountainProgress sits alongside QuestionPanel rather
 // than stacked below it and has more room to read as a bolder title.
-const LARGE_SCREEN_FONT_SCALE = 1.1;
+const LARGE_SCREEN_FONT_SCALE = 1.5;
 
 type MountainProgressProps = {
   isLargeScreen: boolean;
@@ -48,9 +44,9 @@ export function MountainProgress({ isLargeScreen }: MountainProgressProps) {
     setContainerSize({ width, height });
   }
 
-  function handleLabelTextLayout(event: TextLayoutEvent) {
+  function handleLabelLayout(event: LayoutChangeEvent) {
     if (measuredLabelWidth === null) {
-      setMeasuredLabelWidth(event.nativeEvent.lines[0]?.width ?? 0);
+      setMeasuredLabelWidth(event.nativeEvent.layout.width);
     }
   }
 
@@ -90,7 +86,7 @@ export function MountainProgress({ isLargeScreen }: MountainProgressProps) {
             style={[styles.image, imageLayout]}
           />
           <Text
-            onTextLayout={handleLabelTextLayout}
+            onLayout={handleLabelLayout}
             style={[
               styles.label,
               {
