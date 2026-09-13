@@ -34,7 +34,7 @@ export default function App() {
         ]}
       >
         <QuestionPanel />
-        <MountainProgress isLargeScreen={isLargeScreen} />
+        <MountainProgress />
         <StatusBar style="auto" />
       </SafeAreaView>
     </SafeAreaProvider>

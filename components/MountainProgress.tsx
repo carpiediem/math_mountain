@@ -21,11 +21,7 @@ const IMAGE_HEIGHT = 1027;
 const MEASUREMENT_FONT_SIZE = 24;
 const TARGET_WIDTH_RATIO = 0.5;
 
-type MountainProgressProps = {
-  isLargeScreen: boolean;
-};
-
-export function MountainProgress({ isLargeScreen }: MountainProgressProps) {
+export function MountainProgress() {
   const [containerSize, setContainerSize] = useState<{
     width: number;
     height: number;
