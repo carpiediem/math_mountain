@@ -5,6 +5,7 @@ export function MountainProgress() {
     <ImageBackground
       source={require("../assets/images/mountain.jpg")}
       style={styles.container}
+      imageStyle={styles.image}
       resizeMode="contain"
     >
       <View style={styles.labelWrap}>
@@ -20,6 +21,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
   },
   labelWrap: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
