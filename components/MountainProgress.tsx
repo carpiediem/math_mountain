@@ -21,11 +21,6 @@ const IMAGE_HEIGHT = 1027;
 const MEASUREMENT_FONT_SIZE = 24;
 const TARGET_WIDTH_RATIO = 0.5;
 
-// Applied on top of TARGET_WIDTH_RATIO on large screens (see App.tsx's own
-// breakpoint), where MountainProgress sits alongside QuestionPanel rather
-// than stacked below it and has more room to read as a bolder title.
-const LARGE_SCREEN_FONT_SCALE = 1.1;
-
 type MountainProgressProps = {
   isLargeScreen: boolean;
 };
@@ -68,9 +63,8 @@ export function MountainProgress({ isLargeScreen }: MountainProgressProps) {
 
   const labelFontSize =
     containerSize && measuredLabelWidth
-      ? ((MEASUREMENT_FONT_SIZE * (containerSize.width * TARGET_WIDTH_RATIO)) /
-          measuredLabelWidth) *
-        (isLargeScreen ? LARGE_SCREEN_FONT_SCALE : 1)
+      ? (MEASUREMENT_FONT_SIZE * (containerSize.width * TARGET_WIDTH_RATIO)) /
+        measuredLabelWidth
       : MEASUREMENT_FONT_SIZE;
 
   return (
