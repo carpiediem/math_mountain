@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   labelWrap: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
