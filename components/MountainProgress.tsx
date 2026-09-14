@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
+import { Hiker } from "./Hiker";
+import { getStepPosition, STEP_COUNT } from "./mountainSteps";
+
 // The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
 // up front to compute its "contain"-fitted size below, since neither web nor
 // native resizeMode="contain" exposes the scaled image's actual on-screen
@@ -29,6 +32,10 @@ export function MountainProgress() {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
+  // setHikerStep has no caller yet - nothing in this app advances the
+  // hiker's step until question-answering logic exists to drive it.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [hikerStep, setHikerStep] = useState(0);
 
   function handleLayout(event: LayoutChangeEvent) {
     const { width, height } = event.nativeEvent.layout;
@@ -75,6 +82,17 @@ export function MountainProgress() {
             source={require("../assets/images/mountain.jpg")}
             style={[styles.image, imageLayout]}
           />
+          {Array.from({ length: STEP_COUNT }, (_, step) => {
+            const position = getStepPosition(imageLayout, step);
+            return (
+              <View
+                key={step}
+                testID={`mountain-step-${step}`}
+                style={[styles.step, position]}
+              />
+            );
+          })}
+          <Hiker step={hikerStep} imageLayout={imageLayout} />
           <Text
             testID="mountain-progress-label"
             onLayout={handleLabelLayout}
@@ -102,6 +120,12 @@ const styles = StyleSheet.create({
   },
   image: {
     position: "absolute",
+  },
+  step: {
+    position: "absolute",
+    height: 3,
+    backgroundColor: "#fff",
+    opacity: 0.8,
   },
   label: {
     position: "absolute",
