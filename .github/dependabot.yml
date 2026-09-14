@@ -16,6 +16,12 @@ updates:
     # already excluded from that check on purpose (see package.json's
     # expo.install.exclude) since this project intentionally runs ahead of
     # Expo's suggested version - Dependabot should still update it normally.
+    #
+    # eslint is pinned for a related reason: eslint-config-expo (itself
+    # pinned to this Expo SDK version) bundles eslint-plugin-import and
+    # eslint-plugin-react, and neither has published a release supporting
+    # ESLint 10 yet - bumping eslint alone would break linting until
+    # eslint-config-expo catches up.
     ignore:
       - dependency-name: "expo-*"
       - dependency-name: "react"
@@ -23,6 +29,7 @@ updates:
       - dependency-name: "react-native"
       - dependency-name: "react-native-safe-area-context"
       - dependency-name: "react-native-web"
+      - dependency-name: "eslint"
 
   - package-ecosystem: "github-actions"
     directory: "/"
