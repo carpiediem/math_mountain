@@ -1,0 +1,60 @@
+name: EAS Build
+
+# Disabled by default — see the Actions tab ("disable workflow") — enable
+# once this project has a real EAS project id and the Expo free plan's
+# monthly build cap is worth spending on CI-triggered builds.
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: EAS build profile
+        type: choice
+        default: development
+        options:
+          - development
+          - preview
+          - production
+          - production-store
+  push:
+    branches-ignore: [main]
+
+concurrency:
+  group: eas-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - run: npm ci
+
+      - name: EAS build (Android)
+        id: eas-build
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PROFILE: ${{ inputs.profile || 'development' }}
+        run: |
+          npx eas-cli@23.2.0 build --profile "$PROFILE" --platform android --non-interactive --no-wait | tee eas-build-output.log
+          url=$(grep -oE 'https://expo\.dev/accounts/[^ ]+/builds/[^ ]+' eas-build-output.log | head -n1)
+          if [ -n "$url" ]; then
+            { echo "## EAS Build ($PROFILE)"; echo "[View build]($url)"; } >> "$GITHUB_STEP_SUMMARY"
+            echo "build-id=${url##*/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cancel the dispatched EAS build if this run was superseded
+        if: cancelled() && steps.eas-build.outputs.build-id
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx eas-cli@23.2.0 build:cancel ${{ steps.eas-build.outputs.build-id }} --non-interactive

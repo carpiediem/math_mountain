@@ -1,0 +1,111 @@
+import { useState } from "react";
+import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+
+// The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
+// up front to compute its "contain"-fitted size below, since neither web nor
+// native resizeMode="contain" exposes the scaled image's actual on-screen
+// position, which the label needs to track to stay aligned with the image's
+// top-left corner.
+const IMAGE_WIDTH = 1600;
+const IMAGE_HEIGHT = 1027;
+
+// A font-size guess to measure the label's actual rendered width at, since
+// glyph widths (especially for a display face like Henny Penny) aren't
+// predictable from fontSize alone - measuring once and then scaling
+// linearly (width scales ~linearly with fontSize for a fixed string) gets
+// the label to roughly TARGET_WIDTH_RATIO of the panel's width without
+// needing to re-measure on every resize. Measured via the label's own
+// onLayout, not onTextLayout - react-native-web's Text doesn't implement
+// onTextLayout at all, so it would silently never fire on web and leave the
+// label stuck at this base size regardless of container width.
+const MEASUREMENT_FONT_SIZE = 24;
+const TARGET_WIDTH_RATIO = 0.5;
+
+export function MountainProgress() {
+  const [containerSize, setContainerSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
+    null,
+  );
+
+  function handleLayout(event: LayoutChangeEvent) {
+    const { width, height } = event.nativeEvent.layout;
+    setContainerSize({ width, height });
+  }
+
+  function handleLabelLayout(event: LayoutChangeEvent) {
+    if (measuredLabelWidth === null) {
+      setMeasuredLabelWidth(event.nativeEvent.layout.width);
+    }
+  }
+
+  let imageLayout = null;
+  if (containerSize) {
+    const scale = Math.min(
+      containerSize.width / IMAGE_WIDTH,
+      containerSize.height / IMAGE_HEIGHT,
+    );
+    const width = IMAGE_WIDTH * scale;
+    const height = IMAGE_HEIGHT * scale;
+    imageLayout = {
+      width,
+      height,
+      top: (containerSize.height - height) / 2,
+      left: (containerSize.width - width) / 2,
+    };
+  }
+
+  const labelFontSize =
+    containerSize && measuredLabelWidth
+      ? (MEASUREMENT_FONT_SIZE * (containerSize.width * TARGET_WIDTH_RATIO)) /
+        measuredLabelWidth
+      : MEASUREMENT_FONT_SIZE;
+
+  return (
+    <View
+      testID="mountain-progress"
+      style={styles.container}
+      onLayout={handleLayout}
+    >
+      {imageLayout && (
+        <>
+          <Image
+            source={require("../assets/images/mountain.jpg")}
+            style={[styles.image, imageLayout]}
+          />
+          <Text
+            testID="mountain-progress-label"
+            onLayout={handleLabelLayout}
+            style={[
+              styles.label,
+              {
+                top: imageLayout.top,
+                left: imageLayout.left,
+                fontSize: labelFontSize,
+              },
+            ]}
+          >
+            Math Mountain
+          </Text>
+        </>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    overflow: "hidden",
+  },
+  image: {
+    position: "absolute",
+  },
+  label: {
+    position: "absolute",
+    fontFamily: "HennyPenny_400Regular",
+    color: "#fff",
+  },
+});
