@@ -15,33 +15,77 @@ export type StepPosition = {
 
 const STEP_WIDTH_RATIO = 0.07;
 
-// Horizontal path, as a fraction of the fitted mountain image's width. The
-// first ~80% of the climb (fraction 0 to S_CURVE_END) traces one full S:
-// starting near the left edge, swinging out almost to the right edge (the
-// bottom curve), then back to near the left edge (the top curve). The
-// remaining ~20% eases from there over to PEAK_X_FRACTION, so the last step
-// lands on the peak rather than wherever the S happened to end.
+// Horizontal path, as a fraction of the fitted mountain image's width -
+// keyframes eased between (see getHorizontalFraction), tracing one full S
+// up to the peak:
+//   0.0            -> LEFT_EDGE       the climb starts near the image's
+//                                     left edge
+//   BOTTOM_CURVE_END -> RIGHT_EDGE    the bottom curve, out toward the
+//                                     right edge
+//   STEP7_FRACTION -> STEP7_X         a fixed midpoint - without it,
+//                                     reshaping the bottom curve's height
+//                                     (RIGHT_EDGE) would also drag this
+//                                     point around
+//   TOP_CURVE_END  -> MOUNTAIN_LEFT_X the top curve, back to the
+//                                     mountain's own left slope (not the
+//                                     image's left edge - at this height
+//                                     the mountain doesn't reach nearly
+//                                     that far left)
+//   1.0            -> PEAK_X_FRACTION the last step, landing on the peak
 const LEFT_EDGE = 0.03;
-const RIGHT_EDGE = 0.92;
-const S_CURVE_END = 0.8;
+const RIGHT_EDGE = 0.8;
+const BOTTOM_CURVE_END = 0.4;
+const STEP7_FRACTION = 7 / (STEP_COUNT - 1);
+const STEP7_X = 0.847;
+const TOP_CURVE_END = 0.8;
 
-// Where the peak actually sits in assets/images/mountain.jpg, found by
-// scanning for the topmost sky/mountain transition per column - see the
-// last step's alignment below.
+// Where the mountain's peak and its left slope (at the top curve's height,
+// TOP_CURVE_END) actually sit in assets/images/mountain.jpg, found by
+// scanning for the topmost sky/mountain transition per column, and the
+// leftmost sky/mountain transition at that row.
 const PEAK_X_FRACTION = 0.589;
 const PEAK_Y_FRACTION = 0.1;
+const MOUNTAIN_LEFT_X = 0.42;
+
+// Cosine-eases from v0 (at t = t0) to v1 (at t = t1).
+function ease(t: number, t0: number, t1: number, v0: number, v1: number) {
+  return (
+    (v0 + v1) / 2 - ((v1 - v0) / 2) * Math.cos((Math.PI * (t - t0)) / (t1 - t0))
+  );
+}
+
+// Eases from v0 (at t = t0) to v1 (at t = t1), covering ground faster near
+// t0 than near t1 (unlike the symmetric `ease` above) - used only for the
+// final approach to the peak, so the second-to-last step sits a bit closer
+// to the peak's own x position than a symmetric ease would put it.
+function easeOut(t: number, t0: number, t1: number, v0: number, v1: number) {
+  const progress = (t - t0) / (t1 - t0);
+  return v0 + (v1 - v0) * (1 - Math.pow(1 - progress, 1.5));
+}
 
 function getHorizontalFraction(fraction: number): number {
-  if (fraction <= S_CURVE_END) {
-    const center = (LEFT_EDGE + RIGHT_EDGE) / 2;
-    const amplitude = (RIGHT_EDGE - LEFT_EDGE) / 2;
-    return (
-      center - amplitude * Math.cos((2 * Math.PI * fraction) / S_CURVE_END)
+  if (fraction <= BOTTOM_CURVE_END) {
+    return ease(fraction, 0, BOTTOM_CURVE_END, LEFT_EDGE, RIGHT_EDGE);
+  }
+  if (fraction <= STEP7_FRACTION) {
+    return ease(
+      fraction,
+      BOTTOM_CURVE_END,
+      STEP7_FRACTION,
+      RIGHT_EDGE,
+      STEP7_X,
     );
   }
-
-  const approach = (fraction - S_CURVE_END) / (1 - S_CURVE_END);
-  return LEFT_EDGE + (PEAK_X_FRACTION - LEFT_EDGE) * approach;
+  if (fraction <= TOP_CURVE_END) {
+    return ease(
+      fraction,
+      STEP7_FRACTION,
+      TOP_CURVE_END,
+      STEP7_X,
+      MOUNTAIN_LEFT_X,
+    );
+  }
+  return easeOut(fraction, TOP_CURVE_END, 1, MOUNTAIN_LEFT_X, PEAK_X_FRACTION);
 }
 
 // Steps climb the fitted mountain image in an S-curve (see
