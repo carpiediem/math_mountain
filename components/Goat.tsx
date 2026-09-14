@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 
-// Sprite: cropped from the second row of assets/images/goat-sheet.png
-// ("Pilgor" from Goat Simulator, fan sprites by xxultra2006xx on
-// DeviantArt) into an 8-frame walk cycle, assets/images/goat-sprites.png.
-const FRAME_COUNT = 8;
+// Sprite: cropped from assets/images/goat-sheet.png ("Pilgor" from Goat
+// Simulator, fan sprites by xxultra2006xx on DeviantArt -
+// https://www.deviantart.com/xxultra2006xx/art/Pilgor-Goat-Simulator-sprites-890748891)
+// into assets/images/goat-sprites.png: an 8-frame walk cycle from the
+// sheet's second row, plus a 9th frame (the error face below) from the
+// third sprite in its third row.
+const WALK_FRAME_COUNT = 8;
+const ERROR_FRAME_INDEX = 8;
+const TOTAL_FRAME_COUNT = 9;
 export const GOAT_FRAME_ASPECT_RATIO = 72 / 96; // width / height, from the source crop
 const FRAME_INTERVAL_MS = 120;
 const DEFAULT_DURATION_MS = 2000;
@@ -18,6 +23,9 @@ type GoatProps = {
   // of whether this prop is still true.
   animate: boolean;
   durationMs?: number;
+  // Overrides animate/frame cycling to show the error face (the sheet's
+  // yellow-eyed frame) instead.
+  error: boolean;
 };
 
 export function Goat({
@@ -26,6 +34,7 @@ export function Goat({
   size,
   animate,
   durationMs = DEFAULT_DURATION_MS,
+  error,
 }: GoatProps) {
   const [frame, setFrame] = useState(0);
   const width = size * GOAT_FRAME_ASPECT_RATIO;
@@ -36,7 +45,7 @@ export function Goat({
     }
 
     const frameInterval = setInterval(() => {
-      setFrame((current) => (current + 1) % FRAME_COUNT);
+      setFrame((current) => (current + 1) % WALK_FRAME_COUNT);
     }, FRAME_INTERVAL_MS);
 
     const stopTimeout = setTimeout(() => {
@@ -50,6 +59,8 @@ export function Goat({
     };
   }, [animate, durationMs]);
 
+  const displayedFrame = error ? ERROR_FRAME_INDEX : frame;
+
   return (
     <View
       testID="goat"
@@ -59,9 +70,9 @@ export function Goat({
         testID="goat-sprite"
         source={require("../assets/images/goat-sprites.png")}
         style={{
-          width: width * FRAME_COUNT,
+          width: width * TOTAL_FRAME_COUNT,
           height: size,
-          transform: [{ translateX: -frame * width }],
+          transform: [{ translateX: -displayedFrame * width }],
         }}
       />
     </View>

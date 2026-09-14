@@ -40,15 +40,18 @@ export function MountainProgress() {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
-  // setHikerStep/setHikerAnimating/setGoatAnimating have no callers yet -
-  // nothing in this app advances the hiker's step or triggers either
-  // animation until question-answering logic exists to drive them.
+  // setHikerStep/setHikerAnimating/setGoatAnimating/setGoatError have no
+  // callers yet - nothing in this app advances the hiker's step or
+  // triggers either animation, or the goat's error face, until
+  // question-answering logic exists to drive them.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerStep, setHikerStep] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerAnimating, setHikerAnimating] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatAnimating, setGoatAnimating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [goatError, setGoatError] = useState(false);
 
   function handleLayout(event: LayoutChangeEvent) {
     const { width, height } = event.nativeEvent.layout;
@@ -138,6 +141,7 @@ export function MountainProgress() {
             }
             size={goatHeight}
             animate={goatAnimating}
+            error={goatError}
           />
           <Text
             testID="mountain-progress-label"

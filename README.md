@@ -129,6 +129,10 @@ needed once they exist.
 
 Icons are from [Mountain icons created by Magnific - Flaticon](https://www.flaticon.com/free-icons/mountain).
 
-The `Hiker` sprite (`assets/images/hiker.png`) is cropped from
+The `Hiker` sprite (`assets/images/hiker-sprites.png`) is cropped from
 ["Pokemon Sword Gloria (Female Player) Gen 4 OW V2"](https://www.deviantart.com/boonzeet/art/Pokemon-Sword-Gloria-Female-Player-Gen-4-OW-V2-842639028)
 by [Boonzeet](https://www.deviantart.com/boonzeet).
+
+The `Goat` sprite (`assets/images/goat-sprites.png`) is cropped from
+["Pilgor - Goat Simulator sprites"](https://www.deviantart.com/xxultra2006xx/art/Pilgor-Goat-Simulator-sprites-890748891)
+by [xxultra2006xx](https://www.deviantart.com/xxultra2006xx).
