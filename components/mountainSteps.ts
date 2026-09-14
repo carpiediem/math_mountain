@@ -20,14 +20,13 @@ const STEP_WIDTH_RATIO = 0.07;
 // up to the peak:
 //   0.0            -> LEFT_EDGE       the climb starts near the image's
 //                                     left edge
-//   STEP1_FRACTION -> STEP1_X         and STEP7_FRACTION -> STEP7_X below
-//                                     are both fixed midpoints - without
-//                                     them, a single ease from the left
-//                                     edge to the bottom curve's peak
-//                                     bunches steps 2-6 together near that
-//                                     peak instead of spreading them out
-//   STEP7_FRACTION -> STEP7_X         the bottom curve, out toward the
-//                                     right edge
+//   STEP1_FRACTION -> STEP1_X         STEP1/STEP3/STEP7 below are all
+//   STEP3_FRACTION -> STEP3_X         fixed midpoints - without them, a
+//   STEP7_FRACTION -> STEP7_X         single ease between any two of the
+//                                     surrounding keyframes bunches the
+//                                     steps between them together near
+//                                     whichever end they're closest to,
+//                                     instead of spreading them out
 //   TOP_CURVE_END  -> MOUNTAIN_LEFT_X the top curve, back to the
 //                                     mountain's own left slope (not the
 //                                     image's left edge - at this height
@@ -37,6 +36,8 @@ const STEP_WIDTH_RATIO = 0.07;
 const LEFT_EDGE = 0.03;
 const STEP1_FRACTION = 1 / (STEP_COUNT - 1);
 const STEP1_X = 0.1;
+const STEP3_FRACTION = 3 / (STEP_COUNT - 1);
+const STEP3_X = 0.35;
 const STEP7_FRACTION = 7 / (STEP_COUNT - 1);
 const STEP7_X = 0.847;
 const TOP_CURVE_END = 0.8;
@@ -69,8 +70,11 @@ function getHorizontalFraction(fraction: number): number {
   if (fraction <= STEP1_FRACTION) {
     return ease(fraction, 0, STEP1_FRACTION, LEFT_EDGE, STEP1_X);
   }
+  if (fraction <= STEP3_FRACTION) {
+    return ease(fraction, STEP1_FRACTION, STEP3_FRACTION, STEP1_X, STEP3_X);
+  }
   if (fraction <= STEP7_FRACTION) {
-    return ease(fraction, STEP1_FRACTION, STEP7_FRACTION, STEP1_X, STEP7_X);
+    return ease(fraction, STEP3_FRACTION, STEP7_FRACTION, STEP3_X, STEP7_X);
   }
   if (fraction <= TOP_CURVE_END) {
     return ease(
