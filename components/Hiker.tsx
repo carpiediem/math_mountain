@@ -16,7 +16,9 @@ export function Hiker({ step, imageLayout }: HikerProps) {
   if (step < 0 || step > STEP_COUNT - 1) return null;
 
   const position = getStepPosition(imageLayout, step);
-  const size = position.width * 0.9;
+  // Sized off the image directly, not off the (much narrower) step width,
+  // so the hiker doesn't shrink along with the steps.
+  const size = imageLayout.width * 0.126;
 
   return (
     <Image
