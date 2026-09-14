@@ -15,105 +15,40 @@ export type StepPosition = {
 
 const STEP_WIDTH_RATIO = 0.07;
 
-// Horizontal path, as a fraction of the fitted mountain image's width -
-// keyframes eased between (see getHorizontalFraction), tracing one full S
-// up to the peak:
-//   0.0            -> LEFT_EDGE       the climb starts near the image's
-//                                     left edge
-//   STEP1_FRACTION -> STEP1_X         STEP1/STEP3/STEP4/STEP5/STEP7 below
-//   STEP3_FRACTION -> STEP3_X         are all fixed midpoints - without
-//   STEP4_FRACTION -> STEP4_X         them, a single ease between any two
-//   STEP5_FRACTION -> STEP5_X         of the surrounding keyframes bunches
-//   STEP7_FRACTION -> STEP7_X         the steps between them together near
-//                                     whichever end they're closest to,
-//                                     instead of spreading them out
-//   TOP_CURVE_END  -> MOUNTAIN_LEFT_X the top curve, back to the
-//                                     mountain's own left slope (not the
-//                                     image's left edge - at this height
-//                                     the mountain doesn't reach nearly
-//                                     that far left)
-//   1.0            -> PEAK_X_FRACTION the last step, landing on the peak
-const LEFT_EDGE = 0.03;
-const STEP1_FRACTION = 1 / (STEP_COUNT - 1);
-const STEP1_X = 0.1;
-const STEP3_FRACTION = 3 / (STEP_COUNT - 1);
-const STEP3_X = 0.35;
-const STEP5_FRACTION = 5 / (STEP_COUNT - 1);
-const STEP5_X = 0.5985;
-const STEP4_FRACTION = 4 / (STEP_COUNT - 1);
-// Exactly halfway between STEP3_X and STEP5_X, per request.
-const STEP4_X = (STEP3_X + STEP5_X) / 2;
-const STEP7_FRACTION = 7 / (STEP_COUNT - 1);
-const STEP7_X = 0.847;
-const TOP_CURVE_END = 0.8;
+// Each step's position, as a fraction of the fitted mountain image's width
+// (x) and height (y) - hand-tuned to trace an S climbing from the image's
+// lower-left up to just above the peak at assets/images/mountain.jpg's
+// actual peak position (x: 0.589, y: 0.1, found by scanning the image for
+// the topmost sky/mountain transition per column). Edit a step's x/y
+// directly to nudge it; there's no formula tying steps together, so one
+// step's position never shifts as a side effect of adjusting another's.
+const STEP_FRACTIONS: { x: number; y: number }[] = [
+  { x: 0.03, y: 0.92 }, // step 0
+  { x: 0.1, y: 0.8614 }, // step 1
+  { x: 0.225, y: 0.8029 }, // step 2
+  { x: 0.35, y: 0.7443 }, // step 3
+  { x: 0.4742, y: 0.6857 }, // step 4
+  { x: 0.5985, y: 0.6271 }, // step 5
+  { x: 0.7227, y: 0.5686 }, // step 6
+  { x: 0.847, y: 0.51 }, // step 7
+  { x: 0.79, y: 0.4514 }, // step 8
+  { x: 0.6495, y: 0.3929 }, // step 9
+  { x: 0.5004, y: 0.3343 }, // step 10
+  { x: 0.4224, y: 0.2757 }, // step 11
+  { x: 0.487, y: 0.2171 }, // step 12
+  { x: 0.5529, y: 0.1586 }, // step 13
+  { x: 0.589, y: 0.1 }, // step 14 - lands exactly on the peak
+];
 
-// Where the mountain's peak and its left slope (at the top curve's height,
-// TOP_CURVE_END) actually sit in assets/images/mountain.jpg, found by
-// scanning for the topmost sky/mountain transition per column, and the
-// leftmost sky/mountain transition at that row.
-const PEAK_X_FRACTION = 0.589;
-const PEAK_Y_FRACTION = 0.1;
-const MOUNTAIN_LEFT_X = 0.42;
-
-// Cosine-eases from v0 (at t = t0) to v1 (at t = t1).
-function ease(t: number, t0: number, t1: number, v0: number, v1: number) {
-  return (
-    (v0 + v1) / 2 - ((v1 - v0) / 2) * Math.cos((Math.PI * (t - t0)) / (t1 - t0))
-  );
-}
-
-// Eases from v0 (at t = t0) to v1 (at t = t1), covering ground faster near
-// t0 than near t1 (unlike the symmetric `ease` above) - used only for the
-// final approach to the peak, so the second-to-last step sits a bit closer
-// to the peak's own x position than a symmetric ease would put it.
-function easeOut(t: number, t0: number, t1: number, v0: number, v1: number) {
-  const progress = (t - t0) / (t1 - t0);
-  return v0 + (v1 - v0) * (1 - Math.pow(1 - progress, 1.5));
-}
-
-function getHorizontalFraction(fraction: number): number {
-  if (fraction <= STEP1_FRACTION) {
-    return ease(fraction, 0, STEP1_FRACTION, LEFT_EDGE, STEP1_X);
-  }
-  if (fraction <= STEP3_FRACTION) {
-    return ease(fraction, STEP1_FRACTION, STEP3_FRACTION, STEP1_X, STEP3_X);
-  }
-  if (fraction <= STEP4_FRACTION) {
-    return ease(fraction, STEP3_FRACTION, STEP4_FRACTION, STEP3_X, STEP4_X);
-  }
-  if (fraction <= STEP5_FRACTION) {
-    return ease(fraction, STEP4_FRACTION, STEP5_FRACTION, STEP4_X, STEP5_X);
-  }
-  if (fraction <= STEP7_FRACTION) {
-    return ease(fraction, STEP5_FRACTION, STEP7_FRACTION, STEP5_X, STEP7_X);
-  }
-  if (fraction <= TOP_CURVE_END) {
-    return ease(
-      fraction,
-      STEP7_FRACTION,
-      TOP_CURVE_END,
-      STEP7_X,
-      MOUNTAIN_LEFT_X,
-    );
-  }
-  return easeOut(fraction, TOP_CURVE_END, 1, MOUNTAIN_LEFT_X, PEAK_X_FRACTION);
-}
-
-// Steps climb the fitted mountain image in an S-curve (see
-// getHorizontalFraction) from its bottom edge up to just above the peak
-// (see assets/images/mountain.jpg), where the last step (STEP_COUNT - 1)
-// lands.
 export function getStepPosition(
   imageLayout: ImageLayout,
   step: number,
 ): StepPosition {
-  const fraction = step / (STEP_COUNT - 1);
-  const topFraction = 0.92 - fraction * (0.92 - PEAK_Y_FRACTION);
+  const { x, y } = STEP_FRACTIONS[step];
 
   return {
-    top: imageLayout.top + imageLayout.height * topFraction,
-    left:
-      imageLayout.left + imageLayout.width * getHorizontalFraction(fraction),
+    top: imageLayout.top + imageLayout.height * y,
+    left: imageLayout.left + imageLayout.width * x,
     width: imageLayout.width * STEP_WIDTH_RATIO,
   };
 }
