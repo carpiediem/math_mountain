@@ -22,6 +22,14 @@ updates:
     # eslint-plugin-react, and neither has published a release supporting
     # ESLint 10 yet - bumping eslint alone would break linting until
     # eslint-config-expo catches up.
+    #
+    # typescript's major versions are ignored for the same class of reason,
+    # confirmed by a real CI failure (PR #8, bump to 7.0.2): TypeScript 7 is
+    # the new Go-based rewrite, a different compiler implementation, and
+    # @typescript-eslint/typescript-estree (bundled by eslint-config-expo)
+    # crashes parsing against its changed internals - `npm run lint` can't
+    # even start, not just report new errors. Minor/patch bumps within 6.x
+    # aren't known to have this problem, so only majors are blocked here.
     ignore:
       - dependency-name: "expo-*"
       - dependency-name: "react"
@@ -30,6 +38,8 @@ updates:
       - dependency-name: "react-native-safe-area-context"
       - dependency-name: "react-native-web"
       - dependency-name: "eslint"
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
