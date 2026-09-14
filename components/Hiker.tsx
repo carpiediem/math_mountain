@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet } from "react-native";
 
 import { getStepPosition, ImageLayout, STEP_COUNT } from "./mountainSteps";
 
@@ -7,25 +7,26 @@ type HikerProps = {
   imageLayout: ImageLayout;
 };
 
-// TODO: swap this placeholder marker for the actual sprite
-// (assets/images/hiker.png - Pokemon Sword Gloria (Female Player) Gen 4 OW
-// V2 by Boonzeet, https://www.deviantart.com/boonzeet/art/842639028) once
-// that asset is added to the repo.
+// Sprite: "Pokemon Sword Gloria (Female Player) Gen 4 OW V2" by Boonzeet
+// (https://www.deviantart.com/boonzeet/art/Pokemon-Sword-Gloria-Female-Player-Gen-4-OW-V2-842639028),
+// shared by the artist as a reusable RPG Maker resource with credit
+// requested - cropped to the single rightward-facing walk frame from the
+// full character sheet at assets/images/hiker-sheet.png.
 export function Hiker({ step, imageLayout }: HikerProps) {
   if (step < 0 || step > STEP_COUNT - 1) return null;
 
   const position = getStepPosition(imageLayout, step);
-  const size = position.width * 0.7;
+  const size = position.width * 0.9;
 
   return (
-    <View
+    <Image
       testID="hiker"
+      source={require("../assets/images/hiker.png")}
       style={[
-        styles.marker,
+        styles.sprite,
         {
           width: size,
           height: size,
-          borderRadius: size / 2,
           top: position.top - size,
           left: position.left + position.width / 2 - size / 2,
         },
@@ -35,10 +36,7 @@ export function Hiker({ step, imageLayout }: HikerProps) {
 }
 
 const styles = StyleSheet.create({
-  marker: {
+  sprite: {
     position: "absolute",
-    backgroundColor: "#d7263d",
-    borderWidth: 2,
-    borderColor: "#fff",
   },
 });
