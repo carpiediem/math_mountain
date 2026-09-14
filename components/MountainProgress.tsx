@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
+import { Goat, GOAT_FRAME_ASPECT_RATIO } from "./Goat";
 import { Hiker } from "./Hiker";
-import { getStepPosition, STEP_COUNT } from "./mountainSteps";
+import { getStepPosition, isStepMovingLeft, STEP_COUNT } from "./mountainSteps";
 
 // The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
 // up front to compute its "contain"-fitted size below, since neither web nor
@@ -24,6 +25,13 @@ const IMAGE_HEIGHT = 1027;
 const MEASUREMENT_FONT_SIZE = 24;
 const TARGET_WIDTH_RATIO = 0.5;
 
+// The goat's position never changes, so it isn't tied to the step system
+// at all - these are the same fractions step 2's (x) and step 7's (y)
+// positions happened to resolve to, hardcoded directly.
+const GOAT_X_FRACTION = 0.26;
+const GOAT_Y_FRACTION = 0.51;
+const GOAT_HEIGHT_RATIO = 0.1;
+
 export function MountainProgress() {
   const [containerSize, setContainerSize] = useState<{
     width: number;
@@ -32,10 +40,15 @@ export function MountainProgress() {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
-  // setHikerStep has no caller yet - nothing in this app advances the
-  // hiker's step until question-answering logic exists to drive it.
+  // setHikerStep/setHikerAnimating/setGoatAnimating have no callers yet -
+  // nothing in this app advances the hiker's step or triggers either
+  // animation until question-answering logic exists to drive them.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerStep, setHikerStep] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [hikerAnimating, setHikerAnimating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [goatAnimating, setGoatAnimating] = useState(false);
 
   function handleLayout(event: LayoutChangeEvent) {
     const { width, height } = event.nativeEvent.layout;
@@ -70,6 +83,15 @@ export function MountainProgress() {
         measuredLabelWidth
       : MEASUREMENT_FONT_SIZE;
 
+  const goatHeight = imageLayout ? imageLayout.width * GOAT_HEIGHT_RATIO : 0;
+
+  const isHikerStepValid = hikerStep >= 0 && hikerStep < STEP_COUNT;
+  const hikerPosition =
+    imageLayout && isHikerStepValid
+      ? getStepPosition(imageLayout, hikerStep)
+      : null;
+  const hikerSize = imageLayout ? imageLayout.width * 0.126 : 0;
+
   return (
     <View
       testID="mountain-progress"
@@ -92,7 +114,31 @@ export function MountainProgress() {
               />
             );
           })}
-          <Hiker step={hikerStep} imageLayout={imageLayout} />
+          {hikerPosition && (
+            <Hiker
+              top={hikerPosition.top - hikerSize}
+              left={
+                hikerPosition.left + hikerPosition.width / 2 - hikerSize / 2
+              }
+              size={hikerSize}
+              faceLeft={isStepMovingLeft(hikerStep)}
+              animate={hikerAnimating}
+            />
+          )}
+          <Goat
+            top={
+              imageLayout.top +
+              imageLayout.height * GOAT_Y_FRACTION -
+              goatHeight
+            }
+            left={
+              imageLayout.left +
+              imageLayout.width * GOAT_X_FRACTION -
+              (goatHeight * GOAT_FRAME_ASPECT_RATIO) / 2
+            }
+            size={goatHeight}
+            animate={goatAnimating}
+          />
           <Text
             testID="mountain-progress-label"
             onLayout={handleLabelLayout}

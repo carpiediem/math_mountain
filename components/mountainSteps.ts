@@ -40,6 +40,18 @@ const STEP_FRACTIONS: { x: number; y: number }[] = [
   { x: 0.589, y: 0.1 }, // step 14 - lands exactly on the peak
 ];
 
+// Whether the hiker should face left while standing on this step, i.e.
+// whether the climb moved left (rather than right) getting here - direction
+// only depends on the x fractions' relative order, not their scaled pixel
+// values, so this doesn't need an ImageLayout at all. Step 0 (nothing to
+// arrive from) defaults to facing right.
+export function isStepMovingLeft(step: number): boolean {
+  if (step <= 0 || step >= STEP_COUNT) {
+    return false;
+  }
+  return STEP_FRACTIONS[step].x < STEP_FRACTIONS[step - 1].x;
+}
+
 export function getStepPosition(
   imageLayout: ImageLayout,
   step: number,
