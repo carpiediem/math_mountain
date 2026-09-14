@@ -127,8 +127,6 @@ needed once they exist.
 
 ## Credits
 
-Icons are from [Mountain icons created by Magnific - Flaticon](https://www.flaticon.com/free-icons/mountain).
-
 The `Hiker` sprite (`assets/images/hiker-sprites.png`) is cropped from
 ["Pokemon Sword Gloria (Female Player) Gen 4 OW V2"](https://www.deviantart.com/boonzeet/art/Pokemon-Sword-Gloria-Female-Player-Gen-4-OW-V2-842639028)
 by [Boonzeet](https://www.deviantart.com/boonzeet).
