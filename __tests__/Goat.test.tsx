@@ -1,6 +1,9 @@
 import { act, render } from "@testing-library/react-native";
 
-import { Goat } from "../components/Goat";
+import { Goat, GOAT_FRAME_ASPECT_RATIO } from "../components/Goat";
+
+// Every test renders the goat at size 100.
+const FRAME_WIDTH = 100 * GOAT_FRAME_ASPECT_RATIO;
 
 function flatten(style: unknown): Record<string, unknown> {
   return Object.assign({}, ...[style].flat(Infinity));
@@ -43,7 +46,7 @@ describe("Goat", () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(120);
     });
-    expect(getTranslateX(queryByTestId)).toBe(-75);
+    expect(getTranslateX(queryByTestId)).toBeCloseTo(-FRAME_WIDTH);
 
     await act(async () => {
       await jest.advanceTimersByTimeAsync(1000);
@@ -58,7 +61,7 @@ describe("Goat", () => {
       <Goat top={0} left={0} size={100} animate={false} error={true} />,
     );
 
-    expect(getTranslateX(queryByTestId)).toBe(-600);
+    expect(getTranslateX(queryByTestId)).toBeCloseTo(-8 * FRAME_WIDTH);
   });
 
   it("shows the error face even while animating", async () => {
@@ -71,7 +74,7 @@ describe("Goat", () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(120);
     });
-    expect(getTranslateX(queryByTestId)).toBe(-600);
+    expect(getTranslateX(queryByTestId)).toBeCloseTo(-8 * FRAME_WIDTH);
 
     jest.useRealTimers();
   });

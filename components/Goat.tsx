@@ -6,11 +6,14 @@ import { Image, StyleSheet, View } from "react-native";
 // https://www.deviantart.com/xxultra2006xx/art/Pilgor-Goat-Simulator-sprites-890748891)
 // into assets/images/goat-sprites.png: an 8-frame walk cycle from the
 // sheet's second row, plus a 9th frame (the error face below) from the
-// third sprite in its third row.
+// third sprite in its third row. Each frame carries one source pixel of
+// transparent padding on either side: the sprites touch their frame's left
+// edge, so at fractional render widths the next frame's edge column could
+// bleed into the visible window.
 const WALK_FRAME_COUNT = 8;
 const ERROR_FRAME_INDEX = 8;
 const TOTAL_FRAME_COUNT = 9;
-export const GOAT_FRAME_ASPECT_RATIO = 72 / 96; // width / height, from the source crop
+export const GOAT_FRAME_ASPECT_RATIO = 74 / 96; // width / height, from the source crop plus padding
 const FRAME_INTERVAL_MS = 120;
 const DEFAULT_DURATION_MS = 2000;
 
