@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
-import { Goat, GOAT_FRAME_ASPECT_RATIO } from "./Goat";
-import { Hiker } from "./Hiker";
+import {
+  DEFAULT_DURATION_MS as GOAT_ANIMATION_MS,
+  Goat,
+  GOAT_FRAME_ASPECT_RATIO,
+} from "./Goat";
+import { Hiker, MOVE_DURATION_MS } from "./Hiker";
 import { getStepPosition, isStepMovingLeft, STEP_COUNT } from "./mountainSteps";
 
 // The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
@@ -32,7 +36,23 @@ const GOAT_X_FRACTION = 0.26;
 const GOAT_Y_FRACTION = 0.51;
 const GOAT_HEIGHT_RATIO = 0.1;
 
-export function MountainProgress() {
+// How long the goat's error face shows after a wrong answer.
+const GOAT_ERROR_MS = 1000;
+
+// A fresh object for every answer given (even two of the same outcome in a
+// row), so MountainProgress can react to each one rather than only to a
+// change in `correct`.
+export type AnswerResult = { correct: boolean };
+
+type MountainProgressProps = {
+  hikerStep: number;
+  lastAnswer?: AnswerResult | null;
+};
+
+export function MountainProgress({
+  hikerStep,
+  lastAnswer = null,
+}: MountainProgressProps) {
   const [containerSize, setContainerSize] = useState<{
     width: number;
     height: number;
@@ -40,18 +60,57 @@ export function MountainProgress() {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
-  // setHikerStep/setHikerAnimating/setGoatAnimating/setGoatError have no
-  // callers yet - nothing in this app advances the hiker's step or
-  // triggers either animation, or the goat's error face, until
-  // question-answering logic exists to drive them.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [hikerStep, setHikerStep] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerAnimating, setHikerAnimating] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatAnimating, setGoatAnimating] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatError, setGoatError] = useState(false);
+  const [wrongAnswer, setWrongAnswer] = useState(false);
+
+  // The goat reacts to each answer: its walk cycle for a correct one, its
+  // error face for a wrong one. State is adjusted during render (React's
+  // recommended way to react to a changed prop) and the effect only owns the
+  // timer that ends the reaction. Skips the initial null (nothing answered).
+  const [seenAnswer, setSeenAnswer] = useState(lastAnswer);
+  if (lastAnswer !== seenAnswer) {
+    setSeenAnswer(lastAnswer);
+    if (lastAnswer) {
+      setWrongAnswer(!lastAnswer.correct);
+      setGoatAnimating(lastAnswer.correct);
+      setGoatError(!lastAnswer.correct);
+    }
+  }
+
+  useEffect(() => {
+    if (!lastAnswer) {
+      return;
+    }
+
+    const timeout = setTimeout(
+      () => {
+        setGoatAnimating(false);
+        setGoatError(false);
+      },
+      lastAnswer.correct ? GOAT_ANIMATION_MS : GOAT_ERROR_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, [lastAnswer]);
+
+  // Walk while the hiker slides to a new step (the Hiker tweens its position
+  // over MOVE_DURATION_MS itself). The first render is skipped - the hiker
+  // just appears at its starting step.
+  const previousStep = useRef(hikerStep);
+  useEffect(() => {
+    if (previousStep.current === hikerStep) {
+      return;
+    }
+    previousStep.current = hikerStep;
+
+    setHikerAnimating(true);
+    const timeout = setTimeout(
+      () => setHikerAnimating(false),
+      MOVE_DURATION_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, [hikerStep]);
 
   function handleLayout(event: LayoutChangeEvent) {
     const { width, height } = event.nativeEvent.layout;
@@ -93,6 +152,11 @@ export function MountainProgress() {
     imageLayout && isHikerStepValid
       ? getStepPosition(imageLayout, hikerStep)
       : null;
+  // A wrong answer flips the hiker for the duration of its slide back down
+  // (gated on hikerAnimating, so a wrong answer at the bottom, where the
+  // hiker doesn't move, doesn't flip it).
+  const hikerFaceLeft =
+    isStepMovingLeft(hikerStep) !== (wrongAnswer && hikerAnimating);
   const hikerSize = imageLayout ? imageLayout.width * 0.126 : 0;
 
   return (
@@ -124,8 +188,9 @@ export function MountainProgress() {
                 hikerPosition.left + hikerPosition.width / 2 - hikerSize / 2
               }
               size={hikerSize}
-              faceLeft={isStepMovingLeft(hikerStep)}
+              faceLeft={hikerFaceLeft}
               animate={hikerAnimating}
+              durationMs={MOVE_DURATION_MS}
             />
           )}
           <Goat
@@ -141,6 +206,7 @@ export function MountainProgress() {
             }
             size={goatHeight}
             animate={goatAnimating}
+            durationMs={GOAT_ANIMATION_MS}
             error={goatError}
           />
           <Text

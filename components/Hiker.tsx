@@ -11,7 +11,7 @@ import { Animated, Image, StyleSheet } from "react-native";
 const FRAME_COUNT = 4; // square frames, from the source crop
 const FRAME_INTERVAL_MS = 150;
 const DEFAULT_DURATION_MS = 2000;
-const MOVE_DURATION_MS = 500;
+export const MOVE_DURATION_MS = 500;
 
 type HikerProps = {
   top: number;

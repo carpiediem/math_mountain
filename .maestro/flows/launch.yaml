@@ -2,5 +2,6 @@ appId: us.rslc.mathmountain.dev
 ---
 - launchApp:
     clearState: true
-- assertVisible: "QuestionPanel"
+- assertVisible:
+    id: "question-panel"
 - assertVisible: "MountainProgress"

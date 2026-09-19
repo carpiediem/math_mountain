@@ -3,6 +3,14 @@ import { act, fireEvent, render } from "@testing-library/react-native";
 
 import App from "../App";
 
+jest.mock("../utils/arithmeticQuestion", () => ({
+  generateQuestion: () => ({
+    prompt: "1 + 1",
+    options: ["1", "2", "3", "4"],
+    answer: "2",
+  }),
+}));
+
 function flatten(style: unknown): Record<string, unknown> {
   return Object.assign({}, ...[style].flat(Infinity));
 }
@@ -23,7 +31,7 @@ describe("App", () => {
       nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 800 } },
     });
 
-    expect(getByText("QuestionPanel")).toBeVisible();
+    expect(getByTestId("question-panel")).toBeVisible();
     expect(getByText("Math Mountain")).toBeVisible();
   });
 
