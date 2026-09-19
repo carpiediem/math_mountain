@@ -1,5 +1,6 @@
 import { act, fireEvent, render } from "@testing-library/react-native";
 
+import { GOAT_FRAME_ASPECT_RATIO } from "../components/Goat";
 import { MountainProgress } from "../components/MountainProgress";
 
 function flatten(style: unknown): Record<string, unknown> {
@@ -88,7 +89,7 @@ describe("MountainProgress goat reactions", () => {
       .transform as { translateX?: number }[];
     return Math.abs(transform.find((t) => "translateX" in t)!.translateX!);
   }
-  const GOAT_WIDTH = (400 * 0.1 * 72) / 96; // imageLayout.width * ratio * aspect
+  const GOAT_WIDTH = 400 * 0.1 * GOAT_FRAME_ASPECT_RATIO; // imageLayout.width * ratio * aspect
   const ERROR_X = 8 * GOAT_WIDTH;
 
   async function advance(ms: number) {
