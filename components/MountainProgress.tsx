@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
 import { Goat, GOAT_FRAME_ASPECT_RATIO } from "./Goat";
-import { Hiker } from "./Hiker";
+import { Hiker, MOVE_DURATION_MS } from "./Hiker";
 import { getStepPosition, isStepMovingLeft, STEP_COUNT } from "./mountainSteps";
 
 // The asset's own pixel dimensions (see assets/images/mountain.jpg) - needed
@@ -44,15 +44,31 @@ export function MountainProgress({ hikerStep }: MountainProgressProps) {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
-  // setHikerAnimating/setGoatAnimating/setGoatError have no callers yet -
-  // nothing triggers either animation, or the goat's error face, until a
-  // follow-up wires them to answers.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerAnimating, setHikerAnimating] = useState(false);
+  // setGoatAnimating/setGoatError have no callers yet - nothing triggers
+  // the goat's animation or error face until a follow-up wires them up.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatAnimating, setGoatAnimating] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatError, setGoatError] = useState(false);
+
+  // Walk while the hiker slides to a new step (the Hiker tweens its position
+  // over MOVE_DURATION_MS itself). The first render is skipped - the hiker
+  // just appears at its starting step.
+  const previousStep = useRef(hikerStep);
+  useEffect(() => {
+    if (previousStep.current === hikerStep) {
+      return;
+    }
+    previousStep.current = hikerStep;
+
+    setHikerAnimating(true);
+    const timeout = setTimeout(
+      () => setHikerAnimating(false),
+      MOVE_DURATION_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, [hikerStep]);
 
   function handleLayout(event: LayoutChangeEvent) {
     const { width, height } = event.nativeEvent.layout;
@@ -127,6 +143,7 @@ export function MountainProgress({ hikerStep }: MountainProgressProps) {
               size={hikerSize}
               faceLeft={isStepMovingLeft(hikerStep)}
               animate={hikerAnimating}
+              durationMs={MOVE_DURATION_MS}
             />
           )}
           <Goat
