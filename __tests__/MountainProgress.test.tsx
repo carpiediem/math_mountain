@@ -147,3 +147,60 @@ describe("MountainProgress goat reactions", () => {
     expect(goatX(screen)).toBeCloseTo(ERROR_X);
   });
 });
+
+describe("MountainProgress hiker flip on wrong answers", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  // The sprite sheet's row 0 faces right, row 1 faces left.
+  function hikerRow(screen: Screen) {
+    const transform = flatten(screen.getByTestId("hiker-sprite").props.style)
+      .transform as { translateY?: number }[];
+    return Math.abs(transform.find((t) => "translateY" in t)!.translateY!) > 0
+      ? 1
+      : 0;
+  }
+
+  async function advance(ms: number) {
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  // Step 1 faces right (it was reached moving right).
+  it("flips the hiker while it slides down after a wrong answer, then restores it", async () => {
+    const screen = await renderLaidOut(2);
+    expect(hikerRow(screen)).toBe(0);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={1} lastAnswer={{ correct: false }} />,
+    );
+    await advance(10);
+    expect(hikerRow(screen)).toBe(1);
+
+    await advance(600);
+    expect(hikerRow(screen)).toBe(0);
+  });
+
+  it("doesn't flip the hiker after a correct answer", async () => {
+    const screen = await renderLaidOut(1);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={2} lastAnswer={{ correct: true }} />,
+    );
+    await advance(10);
+
+    expect(hikerRow(screen)).toBe(0);
+  });
+
+  it("doesn't flip the hiker on a wrong answer at the bottom, where it doesn't move", async () => {
+    const screen = await renderLaidOut(0);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={0} lastAnswer={{ correct: false }} />,
+    );
+    await advance(10);
+
+    expect(hikerRow(screen)).toBe(0);
+  });
+});

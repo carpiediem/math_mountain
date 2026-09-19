@@ -63,6 +63,7 @@ export function MountainProgress({
   const [hikerAnimating, setHikerAnimating] = useState(false);
   const [goatAnimating, setGoatAnimating] = useState(false);
   const [goatError, setGoatError] = useState(false);
+  const [wrongAnswer, setWrongAnswer] = useState(false);
 
   // The goat reacts to each answer: its walk cycle for a correct one, its
   // error face for a wrong one. State is adjusted during render (React's
@@ -72,6 +73,7 @@ export function MountainProgress({
   if (lastAnswer !== seenAnswer) {
     setSeenAnswer(lastAnswer);
     if (lastAnswer) {
+      setWrongAnswer(!lastAnswer.correct);
       setGoatAnimating(lastAnswer.correct);
       setGoatError(!lastAnswer.correct);
     }
@@ -150,6 +152,11 @@ export function MountainProgress({
     imageLayout && isHikerStepValid
       ? getStepPosition(imageLayout, hikerStep)
       : null;
+  // A wrong answer flips the hiker for the duration of its slide back down
+  // (gated on hikerAnimating, so a wrong answer at the bottom, where the
+  // hiker doesn't move, doesn't flip it).
+  const hikerFaceLeft =
+    isStepMovingLeft(hikerStep) !== (wrongAnswer && hikerAnimating);
   const hikerSize = imageLayout ? imageLayout.width * 0.126 : 0;
 
   return (
@@ -181,7 +188,7 @@ export function MountainProgress({
                 hikerPosition.left + hikerPosition.width / 2 - hikerSize / 2
               }
               size={hikerSize}
-              faceLeft={isStepMovingLeft(hikerStep)}
+              faceLeft={hikerFaceLeft}
               animate={hikerAnimating}
               durationMs={MOVE_DURATION_MS}
             />
