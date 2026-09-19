@@ -12,7 +12,7 @@ const ERROR_FRAME_INDEX = 8;
 const TOTAL_FRAME_COUNT = 9;
 export const GOAT_FRAME_ASPECT_RATIO = 72 / 96; // width / height, from the source crop
 const FRAME_INTERVAL_MS = 120;
-const DEFAULT_DURATION_MS = 2000;
+export const DEFAULT_DURATION_MS = 2000;
 
 type GoatProps = {
   top: number;

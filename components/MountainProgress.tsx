@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 
-import { Goat, GOAT_FRAME_ASPECT_RATIO } from "./Goat";
+import {
+  DEFAULT_DURATION_MS as GOAT_ANIMATION_MS,
+  Goat,
+  GOAT_FRAME_ASPECT_RATIO,
+} from "./Goat";
 import { Hiker, MOVE_DURATION_MS } from "./Hiker";
 import { getStepPosition, isStepMovingLeft, STEP_COUNT } from "./mountainSteps";
 
@@ -32,11 +36,23 @@ const GOAT_X_FRACTION = 0.26;
 const GOAT_Y_FRACTION = 0.51;
 const GOAT_HEIGHT_RATIO = 0.1;
 
+// How long the goat's error face shows after a wrong answer.
+const GOAT_ERROR_MS = 1000;
+
+// A fresh object for every answer given (even two of the same outcome in a
+// row), so MountainProgress can react to each one rather than only to a
+// change in `correct`.
+export type AnswerResult = { correct: boolean };
+
 type MountainProgressProps = {
   hikerStep: number;
+  lastAnswer?: AnswerResult | null;
 };
 
-export function MountainProgress({ hikerStep }: MountainProgressProps) {
+export function MountainProgress({
+  hikerStep,
+  lastAnswer = null,
+}: MountainProgressProps) {
   const [containerSize, setContainerSize] = useState<{
     width: number;
     height: number;
@@ -45,12 +61,36 @@ export function MountainProgress({ hikerStep }: MountainProgressProps) {
     null,
   );
   const [hikerAnimating, setHikerAnimating] = useState(false);
-  // setGoatAnimating/setGoatError have no callers yet - nothing triggers
-  // the goat's animation or error face until a follow-up wires them up.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatAnimating, setGoatAnimating] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [goatError, setGoatError] = useState(false);
+
+  // The goat reacts to each answer: its walk cycle for a correct one, its
+  // error face for a wrong one. State is adjusted during render (React's
+  // recommended way to react to a changed prop) and the effect only owns the
+  // timer that ends the reaction. Skips the initial null (nothing answered).
+  const [seenAnswer, setSeenAnswer] = useState(lastAnswer);
+  if (lastAnswer !== seenAnswer) {
+    setSeenAnswer(lastAnswer);
+    if (lastAnswer) {
+      setGoatAnimating(lastAnswer.correct);
+      setGoatError(!lastAnswer.correct);
+    }
+  }
+
+  useEffect(() => {
+    if (!lastAnswer) {
+      return;
+    }
+
+    const timeout = setTimeout(
+      () => {
+        setGoatAnimating(false);
+        setGoatError(false);
+      },
+      lastAnswer.correct ? GOAT_ANIMATION_MS : GOAT_ERROR_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, [lastAnswer]);
 
   // Walk while the hiker slides to a new step (the Hiker tweens its position
   // over MOVE_DURATION_MS itself). The first render is skipped - the hiker
@@ -159,6 +199,7 @@ export function MountainProgress({ hikerStep }: MountainProgressProps) {
             }
             size={goatHeight}
             animate={goatAnimating}
+            durationMs={GOAT_ANIMATION_MS}
             error={goatError}
           />
           <Text

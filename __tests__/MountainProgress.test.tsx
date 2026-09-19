@@ -78,3 +78,72 @@ describe("MountainProgress hiker animation", () => {
     expect(frameX(screen)).toBe(0);
   });
 });
+
+describe("MountainProgress goat reactions", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  function goatX(screen: Screen) {
+    const transform = flatten(screen.getByTestId("goat-sprite").props.style)
+      .transform as { translateX?: number }[];
+    return Math.abs(transform.find((t) => "translateX" in t)!.translateX!);
+  }
+  const GOAT_WIDTH = (400 * 0.1 * 72) / 96; // imageLayout.width * ratio * aspect
+  const ERROR_X = 8 * GOAT_WIDTH;
+
+  async function advance(ms: number) {
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  it("stays still until an answer is given", async () => {
+    const screen = await renderLaidOut(0);
+    await advance(500);
+
+    expect(goatX(screen)).toBe(0);
+  });
+
+  it("walks after a correct answer, then stands again", async () => {
+    const screen = await renderLaidOut(0);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={1} lastAnswer={{ correct: true }} />,
+    );
+    await advance(250);
+    const walking = goatX(screen);
+    expect(walking).toBeGreaterThan(0);
+    expect(walking).toBeLessThan(ERROR_X);
+
+    await advance(2000);
+    expect(goatX(screen)).toBe(0);
+  });
+
+  it("shows the error face after a wrong answer, then recovers", async () => {
+    const screen = await renderLaidOut(0);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={0} lastAnswer={{ correct: false }} />,
+    );
+    await advance(10);
+    expect(goatX(screen)).toBeCloseTo(ERROR_X);
+
+    await advance(1000);
+    expect(goatX(screen)).toBe(0);
+  });
+
+  it("reacts to a second wrong answer in a row", async () => {
+    const screen = await renderLaidOut(0);
+
+    await screen.rerender(
+      <MountainProgress hikerStep={0} lastAnswer={{ correct: false }} />,
+    );
+    await advance(1500);
+    await screen.rerender(
+      <MountainProgress hikerStep={0} lastAnswer={{ correct: false }} />,
+    );
+    await advance(10);
+
+    expect(goatX(screen)).toBeCloseTo(ERROR_X);
+  });
+});

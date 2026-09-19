@@ -11,8 +11,17 @@ jest.mock("../components/MountainProgress", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require("react-native");
   return {
-    MountainProgress: ({ hikerStep }: { hikerStep: number }) => (
-      <Text testID="mountain-progress">{`step ${hikerStep}`}</Text>
+    MountainProgress: ({
+      hikerStep,
+      lastAnswer,
+    }: {
+      hikerStep: number;
+      lastAnswer: { correct: boolean } | null;
+    }) => (
+      <>
+        <Text testID="mountain-progress">{`step ${hikerStep}`}</Text>
+        <Text testID="last-answer">{JSON.stringify(lastAnswer)}</Text>
+      </>
     ),
   };
 });
@@ -93,6 +102,17 @@ describe("App question flow", () => {
     expect(getByTestId("mountain-progress")).toHaveTextContent(
       `step ${STEP_COUNT - 1}`,
     );
+  });
+
+  it("reports each answer's outcome to MountainProgress", async () => {
+    const { getByTestId, getByText } = await render(<App />);
+    expect(getByTestId("last-answer")).toHaveTextContent("null");
+
+    await fireEvent.press(getByText("right"));
+    expect(getByTestId("last-answer")).toHaveTextContent('{"correct":true}');
+
+    await fireEvent.press(getByText("wrong3"));
+    expect(getByTestId("last-answer")).toHaveTextContent('{"correct":false}');
   });
 
   it("raises the difficulty as the hiker climbs", async () => {
