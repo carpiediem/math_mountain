@@ -32,7 +32,11 @@ const GOAT_X_FRACTION = 0.26;
 const GOAT_Y_FRACTION = 0.51;
 const GOAT_HEIGHT_RATIO = 0.1;
 
-export function MountainProgress() {
+type MountainProgressProps = {
+  hikerStep: number;
+};
+
+export function MountainProgress({ hikerStep }: MountainProgressProps) {
   const [containerSize, setContainerSize] = useState<{
     width: number;
     height: number;
@@ -40,12 +44,9 @@ export function MountainProgress() {
   const [measuredLabelWidth, setMeasuredLabelWidth] = useState<number | null>(
     null,
   );
-  // setHikerStep/setHikerAnimating/setGoatAnimating/setGoatError have no
-  // callers yet - nothing in this app advances the hiker's step or
-  // triggers either animation, or the goat's error face, until
-  // question-answering logic exists to drive them.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [hikerStep, setHikerStep] = useState(0);
+  // setHikerAnimating/setGoatAnimating/setGoatError have no callers yet -
+  // nothing triggers either animation, or the goat's error face, until a
+  // follow-up wires them to answers.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hikerAnimating, setHikerAnimating] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
